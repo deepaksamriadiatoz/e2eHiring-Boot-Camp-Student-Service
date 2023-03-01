@@ -6,5 +6,4 @@ import com.e2ehiring.bootcamp.student.domain.Student;
 
 public interface StudentRepo extends MongoRepository<Student, String> {
 
-	public Student findByName(String name);
 }
