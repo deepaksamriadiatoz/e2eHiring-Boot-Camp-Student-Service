@@ -1,5 +1,7 @@
 package com.e2ehiring.bootcamp.student.resource;
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -17,6 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import com.e2ehiring.bootcamp.student.domain.Student;
+import com.e2ehiring.bootcamp.student.dto.Course;
 import com.e2ehiring.bootcamp.student.service.StudentService;
 
 import io.github.jhipster.web.util.PaginationUtil;
@@ -109,6 +112,59 @@ public class StudentResource {
 			return ResponseEntity.ok().build();
 		} catch (Exception e) {
 			log.error("Logging error while deleting student by id :{}", e.getMessage());
+			return ResponseEntity.internalServerError().body(e.getMessage());
+		}
+	}
+	
+	@GetMapping("/student/search/{name}")
+	public ResponseEntity<?> searchStudentByName(Pageable pageable, @PathVariable("name") String name){
+		log.debug("REST request to search Student by name :{}", name);
+		
+		try {
+			Page<Student> studentPage = studentService.searchStudentByName(pageable, name);
+			HttpHeaders headers = PaginationUtil
+					.generatePaginationHttpHeaders(ServletUriComponentsBuilder.fromCurrentRequest(), studentPage);
+			return ResponseEntity.ok().headers(headers).body(studentPage.getContent());
+		} catch (Exception e) {
+			log.error("Logging error while searching students by name :{}", e.getMessage());
+			return ResponseEntity.internalServerError().body(e.getMessage());
+		}		
+	}
+	
+	
+	@GetMapping("/student/{id}/courses")
+	public ResponseEntity<?> getStudentCourses(@PathVariable("id") String id) throws Exception{
+		log.debug("REST request to search Student courses :{}", id);
+		try {
+			List<Course> studentCourses = studentService.getStudentCourses(id);
+			return ResponseEntity.ok(studentCourses);
+		} catch (Exception e) {
+			log.error("Logging error while find student courses :{}", e.getMessage());
+			return ResponseEntity.internalServerError().body(e.getMessage());
+		}
+	}
+	
+	
+	@PatchMapping("/student/{id}/course")
+	public ResponseEntity<?> enrollStudentInCourse(@PathVariable("id") String id, @RequestBody List<String> courseIds){
+		log.debug("REST request to enroll student :{} in courses :{}", id, courseIds);
+		try {
+			studentService.enrollStudentInCourses(id, courseIds);
+			return ResponseEntity.ok().build();
+		} catch (Exception e) {
+			log.error("Logging error while find student courses :{}", e.getMessage());
+			return ResponseEntity.internalServerError().body(e.getMessage());
+		}
+	}
+	
+	@GetMapping("/student/list")
+	public ResponseEntity<?> getStudentsByIds(@RequestBody List<String> ids){
+		log.debug("REST request to get student by ids :{}", ids);
+		try {
+			List<Student> studentByIds = studentService.getStudentByIds(ids);
+			return ResponseEntity.ok(studentByIds);
+		} catch (Exception e) {
+			log.error("Logging error while finding students by ids :{}", e.getMessage());
 			return ResponseEntity.internalServerError().body(e.getMessage());
 		}
 	}
